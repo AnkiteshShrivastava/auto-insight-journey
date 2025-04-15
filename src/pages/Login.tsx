@@ -38,6 +38,7 @@ const Login = () => {
           variant: "default",
         });
         
+        // Navigate to dashboard
         navigate("/");
       } else {
         toast({
