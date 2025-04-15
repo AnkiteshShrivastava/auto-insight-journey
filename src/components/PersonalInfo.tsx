@@ -1,40 +1,39 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Car, CreditCard, FileText, User } from "lucide-react";
+import { Car, FileText, User, MapPin, Calendar, Phone } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+
+interface UserData {
+  name: string;
+  vehicleNumber: string;
+  photoUrl: string;
+}
 
 const PersonalInfo = () => {
-  const [vehicleNumber, setVehicleNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState<null | {
-    ownerName: string;
-    vehicleClass: string;
-    registrationDate: string;
-    insuranceValidity: string;
-    registrationAuthority: string;
-    model: string;
-  }>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // This is a placeholder for the mParivahan API call
-  const fetchVehicleDetails = () => {
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      // For demo purposes, we'll just set some dummy data
-      // In a real implementation, this would be the response from the mParivahan API
-      setUserData({
-        ownerName: "Rajesh Kumar",
-        vehicleClass: "LMV - Car",
-        registrationDate: "15-06-2019",
-        insuranceValidity: "14-06-2025",
-        registrationAuthority: "RTO Mumbai (MH-01)",
-        model: "Maruti Suzuki Swift",
-      });
-      setLoading(false);
-    }, 1500);
+  useEffect(() => {
+    // Get user data from localStorage
+    const user = localStorage.getItem("user");
+    if (user) {
+      setUserData(JSON.parse(user));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+      variant: "default",
+    });
+    navigate("/login");
   };
 
   return (
@@ -42,85 +41,84 @@ const PersonalInfo = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Car className="text-carPurple-200" />
-            Vehicle Information
+            <User className="text-carPurple-200" />
+            Personal Information
           </CardTitle>
-          <CardDescription>Enter your vehicle registration number to fetch details</CardDescription>
+          <CardDescription>Your profile information from mParivahan</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Input
-              placeholder="Enter Vehicle Number (e.g., MH01AB1234)"
-              value={vehicleNumber}
-              onChange={(e) => setVehicleNumber(e.target.value)}
-              className="flex-1"
-            />
-            <Button 
-              className="bg-carPurple-200 hover:bg-carPurple-300 text-white"
-              onClick={fetchVehicleDetails}
-              disabled={loading || !vehicleNumber}
-            >
-              {loading ? "Fetching..." : "Fetch Details"}
-            </Button>
-          </div>
-          
-          <div className="mt-6">
-            {userData ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <User className="text-carPurple-200 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Owner Name</p>
-                      <p className="font-medium">{userData.ownerName}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Car className="text-carPurple-200 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Vehicle Class</p>
-                      <p className="font-medium">{userData.vehicleClass}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <FileText className="text-carPurple-200 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Registration Date</p>
-                      <p className="font-medium">{userData.registrationDate}</p>
-                    </div>
+          {userData ? (
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="flex flex-col items-center">
+                <Avatar className="h-24 w-24 mb-2">
+                  <AvatarImage src={userData.photoUrl} alt={userData.name} />
+                  <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <Button
+                  variant="outline"
+                  className="mt-4 text-sm"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </div>
+              
+              <div className="flex-1 space-y-4">
+                <div className="flex items-start gap-3">
+                  <User className="text-carPurple-200 mt-1" size={20} />
+                  <div>
+                    <p className="text-sm text-gray-500">Full Name</p>
+                    <p className="font-medium">{userData.name}</p>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <CreditCard className="text-carPurple-200 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Insurance Valid Until</p>
-                      <p className="font-medium">{userData.insuranceValidity}</p>
-                    </div>
+                
+                <div className="flex items-start gap-3">
+                  <Car className="text-carPurple-200 mt-1" size={20} />
+                  <div>
+                    <p className="text-sm text-gray-500">Vehicle Number</p>
+                    <p className="font-medium">{userData.vehicleNumber}</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <FileText className="text-carPurple-200 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Registration Authority</p>
-                      <p className="font-medium">{userData.registrationAuthority}</p>
-                    </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <MapPin className="text-carPurple-200 mt-1" size={20} />
+                  <div>
+                    <p className="text-sm text-gray-500">Registration Authority</p>
+                    <p className="font-medium">RTO Mumbai (MH-01)</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Car className="text-carPurple-200 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Model</p>
-                      <p className="font-medium">{userData.model}</p>
-                    </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <Calendar className="text-carPurple-200 mt-1" size={20} />
+                  <div>
+                    <p className="text-sm text-gray-500">Registration Date</p>
+                    <p className="font-medium">15-06-2019</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <Phone className="text-carPurple-200 mt-1" size={20} />
+                  <div>
+                    <p className="text-sm text-gray-500">Contact Number</p>
+                    <p className="font-medium">+91 98XXXXXXXX</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <FileText className="text-carPurple-200 mt-1" size={20} />
+                  <div>
+                    <p className="text-sm text-gray-500">License Number</p>
+                    <p className="font-medium">MH0120190012345</p>
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-center p-8">
-                <p className="text-gray-500">Enter your vehicle number and click "Fetch Details" to view your information</p>
-                <p className="text-sm text-gray-400 mt-2">Data will be fetched from the mParivahan API</p>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="text-center p-8">
+              <p className="text-gray-500">No user information available</p>
+              <p className="text-sm text-gray-400 mt-2">Please log in to view your information</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
