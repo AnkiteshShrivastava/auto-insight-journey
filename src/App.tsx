@@ -13,14 +13,21 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is logged in
     const user = localStorage.getItem("user");
     if (user) {
-      const userData = JSON.parse(user);
-      setIsLoggedIn(userData.isLoggedIn);
+      try {
+        const userData = JSON.parse(user);
+        setIsLoggedIn(userData.isLoggedIn);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        localStorage.removeItem("user");
+      }
     }
+    setIsLoading(false);
   }, []);
 
   return (
@@ -29,12 +36,20 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
-            <Route path="/" element={isLoggedIn ? <Index /> : <Navigate to="/login" />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {!isLoading && (
+            <Routes>
+              <Route 
+                path="/login" 
+                element={isLoggedIn ? <Navigate to="/" /> : <Login />} 
+              />
+              <Route 
+                path="/" 
+                element={isLoggedIn ? <Index /> : <Navigate to="/login" />} 
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          )}
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

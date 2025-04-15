@@ -38,16 +38,16 @@ const Login = () => {
           variant: "default",
         });
         
-        // Navigate to dashboard
-        navigate("/");
+        // Navigate to dashboard - force a page reload to update auth state
+        window.location.href = "/";
       } else {
         toast({
           title: "Login failed",
           description: "Please check your credentials and try again.",
           variant: "destructive",
         });
+        setLoading(false);
       }
-      setLoading(false);
     }, 1500);
   };
 
