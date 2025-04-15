@@ -1,5 +1,5 @@
 
-import { AlertCircle, Battery, Gauge, Thermometer, Wrench } from "lucide-react";
+import { AlertCircle, Gauge, Wrench, Zap, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const CarHealth = () => {
@@ -14,10 +14,10 @@ const CarHealth = () => {
         <Card className="border-l-4 border-l-carPurple-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Battery className="text-carPurple-200" size={18} />
-              Battery Health
+              <Zap className="text-carPurple-200" size={18} />
+              Engine Vibration
             </CardTitle>
-            <CardDescription>Current battery status</CardDescription>
+            <CardDescription>Monitor engine vibration levels</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-24 flex items-center justify-center">
@@ -44,10 +44,10 @@ const CarHealth = () => {
         <Card className="border-l-4 border-l-carPurple-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Thermometer className="text-carPurple-200" size={18} />
-              Temperature
+              <BarChart3 className="text-carPurple-200" size={18} />
+              Tire Pressure
             </CardTitle>
-            <CardDescription>Engine and system temperatures</CardDescription>
+            <CardDescription>Monitor all tire pressure levels</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-24 flex items-center justify-center">
