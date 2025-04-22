@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import Navigation, { SectionType } from "@/components/Navigation";
 import CarHealth from "@/components/CarHealth";
 import PersonalInfo from "@/components/PersonalInfo";
 import JourneyAnalytics from "@/components/JourneyAnalytics";
+import MParivahanLinking from "@/components/MParivahanLinking";
 import InteractiveBackground from "@/components/InteractiveBackground";
 
 const Index = () => {
@@ -14,7 +16,12 @@ const Index = () => {
       case "car-health":
         return <CarHealth />;
       case "personal-info":
-        return <PersonalInfo />;
+        return (
+          <div className="space-y-6">
+            <MParivahanLinking />
+            <PersonalInfo />
+          </div>
+        );
       case "journey-analytics":
         return <JourneyAnalytics />;
       default:
