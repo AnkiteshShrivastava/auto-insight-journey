@@ -5,11 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const Header = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -30,10 +33,19 @@ const Header = () => {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div className={cn(
+        "container mx-auto flex justify-between items-center",
+        isMobile ? "px-3 py-2" : "px-4 py-3"
+      )}>
         <div className="flex items-center gap-2">
-          <Car className="h-6 w-6 text-carPurple-200" />
-          <span className="font-semibold text-lg text-carPurple-900">Auto Insight</span>
+          <Car className={cn(
+            "text-carPurple-200",
+            isMobile ? "h-5 w-5" : "h-6 w-6"
+          )} />
+          <span className={cn(
+            "font-semibold text-carPurple-900",
+            isMobile ? "text-base" : "text-lg"
+          )}>Auto Insight</span>
         </div>
         
         {user && (
@@ -41,7 +53,13 @@ const Header = () => {
             <span className="text-sm font-medium text-gray-600 hidden sm:inline-block">
               {user.email}
             </span>
-            <Avatar className="h-8 w-8 cursor-pointer" onClick={handleLogout}>
+            <Avatar 
+              className={cn(
+                "cursor-pointer", 
+                isMobile ? "h-7 w-7" : "h-8 w-8"
+              )} 
+              onClick={handleLogout}
+            >
               <AvatarImage src={user.user_metadata.avatar_url} alt={user.email || ""} />
               <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
