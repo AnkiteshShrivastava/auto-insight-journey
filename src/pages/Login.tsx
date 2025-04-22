@@ -1,54 +1,78 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Car, LogIn } from "lucide-react";
+import { Car, LogIn, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import InteractiveBackground from "@/components/InteractiveBackground";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  if (user) {
+    navigate("/");
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call to mParivahan
-    setTimeout(() => {
-      // For demo purposes, we'll just check if fields are not empty
-      if (username && password) {
-        // Store user information in localStorage
-        const userData = {
-          name: "Rajesh Kumar",
-          vehicleNumber: "MH01AB1234",
-          photoUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-          isLoggedIn: true
-        };
-        localStorage.setItem("user", JSON.stringify(userData));
-        
-        toast({
-          title: "Login successful",
-          description: "Welcome back, Rajesh Kumar!",
-          variant: "default",
+
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+            },
+          },
         });
-        
-        // Navigate to dashboard - force a page reload to update auth state
-        window.location.href = "/";
+
+        if (error) throw error;
+
+        toast({
+          title: "Account created",
+          description: "Please verify your email to complete registration",
+        });
       } else {
-        toast({
-          title: "Login failed",
-          description: "Please check your credentials and try again.",
-          variant: "destructive",
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        setLoading(false);
+
+        if (error) throw error;
+
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in",
+        });
+
+        navigate("/");
       }
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -61,18 +85,31 @@ const Login = () => {
           </div>
           <CardTitle className="text-2xl font-bold text-carPurple-900">Auto Insight</CardTitle>
           <CardDescription>
-            Sign in with your mParivahan credentials to access your car monitoring dashboard
+            {isSignUp ? "Create an account" : "Sign in to your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Enter your full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required={isSignUp}
+                />
+              </div>
+            )}
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                placeholder="Enter your mParivahan username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -93,23 +130,36 @@ const Login = () => {
               disabled={loading}
             >
               {loading ? (
-                <span>Signing in...</span>
+                <span>Please wait...</span>
               ) : (
                 <>
-                  <LogIn className="mr-2 h-4 w-4" /> Sign In
+                  {isSignUp ? (
+                    <>
+                      <UserPlus className="mr-2 h-4 w-4" /> Sign Up
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="mr-2 h-4 w-4" /> Sign In
+                    </>
+                  )}
                 </>
               )}
             </Button>
+
+            <div className="text-center mt-4">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-gray-600 hover:text-carPurple-200"
+              >
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up"}
+              </button>
+            </div>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-500">
-            <p>Demo access: Enter any username and password</p>
-          </div>
         </CardContent>
       </Card>
-      
-      <footer className="fixed bottom-0 w-full p-4 text-center text-sm text-gray-600 backdrop-blur-sm">
-        © 2025 Auto Insight | Car Monitoring Platform
-      </footer>
     </div>
   );
 };

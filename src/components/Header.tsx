@@ -1,29 +1,31 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Car } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface UserData {
-  name: string;
-  photoUrl: string;
-}
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    // Get user data from localStorage
-    const user = localStorage.getItem("user");
-    if (user) {
-      setUserData(JSON.parse(user));
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully",
+      });
+      navigate("/login");
     }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
   };
 
   return (
@@ -34,14 +36,14 @@ const Header = () => {
           <span className="font-semibold text-lg text-carPurple-900">Auto Insight</span>
         </div>
         
-        {userData && (
+        {user && (
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600 hidden sm:inline-block">
-              {userData.name}
+              {user.email}
             </span>
             <Avatar className="h-8 w-8 cursor-pointer" onClick={handleLogout}>
-              <AvatarImage src={userData.photoUrl} alt={userData.name} />
-              <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={user.user_metadata.avatar_url} alt={user.email || ""} />
+              <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>
         )}
