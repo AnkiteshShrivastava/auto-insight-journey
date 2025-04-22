@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import Navigation, { SectionType } from "@/components/Navigation";
 import CarHealth from "@/components/CarHealth";
 import PersonalInfo from "@/components/PersonalInfo";
 import JourneyAnalytics from "@/components/JourneyAnalytics";
+import InteractiveBackground from "@/components/InteractiveBackground";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState<SectionType>("car-health");
@@ -23,7 +23,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
+      <InteractiveBackground />
       <Header />
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-2xl md:text-3xl font-bold text-carPurple-900 mb-2">Dashboard</h1>
@@ -45,7 +46,7 @@ const Index = () => {
         </div>
       </div>
       
-      <footer className="bg-carPurple-900 text-white py-4 px-6 mt-12">
+      <footer className="bg-carPurple-900/80 backdrop-blur-sm text-white py-4 px-6 mt-12">
         <div className="container mx-auto">
           <p className="text-center text-sm">
             © 2025 Auto Insight | Car Monitoring Platform

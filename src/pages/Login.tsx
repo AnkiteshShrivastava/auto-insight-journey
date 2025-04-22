@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Car, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import InteractiveBackground from "@/components/InteractiveBackground";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -52,8 +52,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <InteractiveBackground />
+      <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Car className="h-12 w-12 text-carPurple-200" />
@@ -106,7 +107,7 @@ const Login = () => {
         </CardContent>
       </Card>
       
-      <footer className="fixed bottom-0 w-full p-4 text-center text-sm text-gray-500">
+      <footer className="fixed bottom-0 w-full p-4 text-center text-sm text-gray-600 backdrop-blur-sm">
         © 2025 Auto Insight | Car Monitoring Platform
       </footer>
     </div>
