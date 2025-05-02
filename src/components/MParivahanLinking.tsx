@@ -1,13 +1,14 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useMParivahanService } from "@/services/mParivahanService";
 
 const MParivahanLinking = () => {
   const [dlNumber, setDlNumber] = useState("");
@@ -15,43 +16,38 @@ const MParivahanLinking = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const mParivahanService = useMParivahanService();
 
   const handleLinkAccount = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to link your account",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Mock mParivahan data
-      const mockData = {
-        fullName: "John Doe",
-        vehicleNumber: "MH01AB1234",
-        registrationAuthority: "RTO Mumbai (MH-01)",
-        registrationDate: "2019-06-15",
-        contactNumber: "+91 9876543210",
-        licenseNumber: dlNumber,
-        photoUrl: "https://example.com/photo.jpg"
-      };
+      // Use the mParivahan service to link the account
+      const userData = await mParivahanService.linkMParivahanAccount(dlNumber);
+      
+      if (!userData) {
+        throw new Error("Failed to retrieve user data");
+      }
 
-      // Update user profile with mock mParivahan data
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: mockData.fullName,
-          vehicle_number: mockData.vehicleNumber,
-          registration_authority: mockData.registrationAuthority,
-          registration_date: mockData.registrationDate,
-          contact_number: mockData.contactNumber,
-          license_number: mockData.licenseNumber,
-          photo_url: mockData.photoUrl,
-        })
-        .eq('id', user?.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Account Linked",
-        description: "Your mParivahan account has been successfully linked.",
-      });
+      // Save the user profile data to Supabase
+      const success = await mParivahanService.saveUserProfileData(user.id, userData);
+      
+      if (success) {
+        toast({
+          title: "Account Linked",
+          description: "Your mParivahan account has been successfully linked.",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
