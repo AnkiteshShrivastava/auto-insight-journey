@@ -54,7 +54,7 @@ const PersonalInfo = () => {
           <User className="text-carPurple-200" />
           Personal Information
         </CardTitle>
-        <CardDescription>Your profile information from mParivahan</CardDescription>
+        <CardDescription>Your profile information</CardDescription>
       </CardHeader>
       <CardContent>
         {userData ? (
@@ -122,7 +122,7 @@ const PersonalInfo = () => {
           <div className="text-center p-8">
             <p className="text-gray-500">No user information available</p>
             <p className="text-sm text-gray-400 mt-2">
-              Link your mParivahan account above to view your information
+              Update your information using the form above
             </p>
           </div>
         )}

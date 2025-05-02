@@ -4,8 +4,8 @@ import Header from "@/components/Header";
 import Navigation, { SectionType } from "@/components/Navigation";
 import CarHealth from "@/components/CarHealth";
 import PersonalInfo from "@/components/PersonalInfo";
+import UserInfoForm from "@/components/UserInfoForm";
 import JourneyAnalytics from "@/components/JourneyAnalytics";
-import MParivahanLinking from "@/components/MParivahanLinking";
 import InteractiveBackground from "@/components/InteractiveBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ const Index = () => {
       case "personal-info":
         return (
           <div className="space-y-4">
-            <MParivahanLinking />
+            <UserInfoForm />
             <PersonalInfo />
           </div>
         );
