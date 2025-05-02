@@ -130,20 +130,31 @@ const UserInfoForm = () => {
         .from('user-uploads')
         .getPublicUrl(filePath);
 
-      // Update photo URL in state and database
+      // Update photo URL in state
       setPhotoUrl(data.publicUrl);
-
-      // Update the profile with the photo URL
+      
+      // Update the form data with the current values
+      const currentFormValues = form.getValues();
+      
+      // Update the profile with the photo URL and all current form values
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ photo_url: data.publicUrl })
+        .update({ 
+          photo_url: data.publicUrl,
+          full_name: currentFormValues.full_name,
+          vehicle_number: currentFormValues.vehicle_number,
+          registration_authority: currentFormValues.registration_authority,
+          registration_date: currentFormValues.registration_date,
+          contact_number: currentFormValues.contact_number,
+          license_number: currentFormValues.license_number
+        })
         .eq('id', user.id);
 
       if (updateError) throw updateError;
 
       toast({
         title: "Success",
-        description: "License photo uploaded successfully",
+        description: "License photo and information updated successfully",
       });
 
     } catch (error: any) {
@@ -171,17 +182,16 @@ const UserInfoForm = () => {
     setLoading(true);
 
     try {
+      // Create update object including the photo URL if it exists
+      const updateData = {
+        ...data,
+        photo_url: photoUrl // Include the current photo URL in the update
+      };
+
       // Save user data to Supabase
       const { error } = await supabase
         .from('profiles')
-        .update({
-          full_name: data.full_name,
-          vehicle_number: data.vehicle_number,
-          registration_authority: data.registration_authority,
-          registration_date: data.registration_date,
-          contact_number: data.contact_number,
-          license_number: data.license_number
-        })
+        .update(updateData)
         .eq('id', user.id);
 
       if (error) throw error;
