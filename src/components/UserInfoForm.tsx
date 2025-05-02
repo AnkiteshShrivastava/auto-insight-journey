@@ -1,8 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -43,40 +42,39 @@ const UserInfoForm = () => {
   });
 
   // Load existing user data if available
-  const loadUserData = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user) return;
       
-      if (error) throw error;
-      
-      if (data) {
-        // Set form values with existing data
-        form.reset({
-          full_name: data.full_name || "",
-          vehicle_number: data.vehicle_number || "",
-          registration_authority: data.registration_authority || "",
-          registration_date: data.registration_date ? new Date(data.registration_date).toISOString().split('T')[0] : "",
-          contact_number: data.contact_number || "",
-          license_number: data.license_number || ""
-        });
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
         
-        setPhotoUrl(data.photo_url);
+        if (error) throw error;
+        
+        if (data) {
+          // Set form values with existing data
+          form.reset({
+            full_name: data.full_name || "",
+            vehicle_number: data.vehicle_number || "",
+            registration_authority: data.registration_authority || "",
+            registration_date: data.registration_date ? new Date(data.registration_date).toISOString().split('T')[0] : "",
+            contact_number: data.contact_number || "",
+            license_number: data.license_number || ""
+          });
+          
+          setPhotoUrl(data.photo_url);
+        }
+      } catch (error: any) {
+        console.error("Error loading user data:", error);
       }
-    } catch (error: any) {
-      console.error("Error loading user data:", error);
-    }
-  };
+    };
 
-  // Load user data on component mount
-  useState(() => {
     loadUserData();
-  });
+  }, [user, form]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!user) {
