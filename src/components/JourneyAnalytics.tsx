@@ -20,10 +20,10 @@ const JourneyAnalytics = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="recent">
-        <TabsList className="bg-slate-100">
-          <TabsTrigger value="recent">Recent Journeys</TabsTrigger>
-          <TabsTrigger value="stats">Journey Stats</TabsTrigger>
-          <TabsTrigger value="history">Full History</TabsTrigger>
+        <TabsList className="bg-slate-100 w-full">
+          <TabsTrigger value="recent" className="flex-1">Recent Journeys</TabsTrigger>
+          <TabsTrigger value="stats" className="flex-1">Journey Stats</TabsTrigger>
+          <TabsTrigger value="history" className="flex-1">Full History</TabsTrigger>
         </TabsList>
         
         <TabsContent value="recent" className="space-y-4 mt-4">
@@ -81,33 +81,35 @@ const JourneyAnalytics = () => {
               <CardTitle className="text-lg">Journey History</CardTitle>
               <CardDescription>Complete history of your trips</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ScrollArea className={cn("h-64", isMobile ? "max-w-[calc(100vw-3rem)]" : "")}>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>From</TableHead>
-                      <TableHead>To</TableHead>
-                      <TableHead>Distance</TableHead>
-                      <TableHead>Duration</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="whitespace-nowrap">-</TableCell>
-                        <TableCell className="whitespace-nowrap">-</TableCell>
-                        <TableCell className="whitespace-nowrap">-</TableCell>
-                        <TableCell className="whitespace-nowrap">-</TableCell>
-                        <TableCell className="whitespace-nowrap">-</TableCell>
+            <CardContent className="p-0 sm:p-6">
+              <ScrollArea className={cn("h-64", isMobile ? "w-full" : "")}>
+                <div className={cn(isMobile ? "min-w-[600px] px-4" : "")}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                        <TableHead className="text-xs sm:text-sm">From</TableHead>
+                        <TableHead className="text-xs sm:text-sm">To</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Distance</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Duration</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {Array.from({ length: 10 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="whitespace-nowrap text-xs sm:text-sm py-2 sm:py-4">-</TableCell>
+                          <TableCell className="whitespace-nowrap text-xs sm:text-sm py-2 sm:py-4">-</TableCell>
+                          <TableCell className="whitespace-nowrap text-xs sm:text-sm py-2 sm:py-4">-</TableCell>
+                          <TableCell className="whitespace-nowrap text-xs sm:text-sm py-2 sm:py-4">-</TableCell>
+                          <TableCell className="whitespace-nowrap text-xs sm:text-sm py-2 sm:py-4">-</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </ScrollArea>
-              <div className="mt-4 flex items-center justify-center">
-                <p className="text-sm text-gray-400 flex items-center gap-1">
+              <div className="mt-4 flex items-center justify-center p-4">
+                <p className="text-xs sm:text-sm text-gray-400 flex items-center gap-1">
                   <History size={14} />
                   No journey history available yet
                 </p>
@@ -121,4 +123,3 @@ const JourneyAnalytics = () => {
 };
 
 export default JourneyAnalytics;
-
