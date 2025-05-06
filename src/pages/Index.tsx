@@ -33,7 +33,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-safe pb-safe">
       <InteractiveBackground />
       <Header />
       <div className={cn(

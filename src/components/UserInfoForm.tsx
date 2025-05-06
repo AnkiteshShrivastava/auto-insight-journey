@@ -329,7 +329,10 @@ const UserInfoForm = () => {
             <Button 
               type="submit" 
               disabled={loading}
-              className={cn("w-full", isMobile && "h-11")}
+              className={cn(
+                "w-full bg-carBlue-300 hover:bg-carBlue-400 text-white", 
+                isMobile && "h-11"
+              )}
             >
               {loading ? "Updating..." : "Update Information"}
             </Button>

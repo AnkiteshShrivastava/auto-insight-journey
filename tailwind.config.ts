@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -59,8 +60,8 @@ export default {
 					900: '#1A1F2C',
 				},
 				carBlue: {
-					400: '#1EAEDB',
 					300: '#33C3F0',
+					400: '#1EAEDB',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',

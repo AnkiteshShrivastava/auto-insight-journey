@@ -52,6 +52,9 @@ const Login = () => {
           title: "Account created",
           description: "Please verify your email to complete registration",
         });
+
+        // Set isSignUp to false to switch to the login form after successful signup
+        setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -79,7 +82,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 pt-safe pb-safe">
       <InteractiveBackground />
       <Card className={cn(
         "w-full bg-white/80 backdrop-blur-sm",
