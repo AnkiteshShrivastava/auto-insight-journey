@@ -43,9 +43,19 @@ const PersonalInfo = () => {
         // Try to decrypt the encrypted data if available
         if (data?.encrypted_data) {
           setIsDecrypting(true);
-          const decrypted = await decryptData(data.encrypted_data);
-          setDecryptedData(decrypted);
-          setIsDecrypting(false);
+          try {
+            const decrypted = await decryptData(data.encrypted_data);
+            setDecryptedData(decrypted);
+          } catch (decryptError) {
+            console.error("Failed to decrypt data:", decryptError);
+            toast({
+              title: "Decryption Error",
+              description: "Could not decrypt your secure data",
+              variant: "destructive",
+            });
+          } finally {
+            setIsDecrypting(false);
+          }
         }
       } catch (error: any) {
         toast({
@@ -79,7 +89,7 @@ const PersonalInfo = () => {
             Personal Information
           </CardTitle>
           <Badge variant="outline" className="flex items-center gap-1 text-green-700 border-green-700">
-            <Shield className="h-3 w-3" /> Post-Quantum Secured
+            <Shield className="h-3 w-3" /> Secure Encryption
           </Badge>
         </div>
         <CardDescription>Your profile information</CardDescription>

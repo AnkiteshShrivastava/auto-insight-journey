@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,26 +46,26 @@ const UserInfoForm = () => {
   // Check for existing keys on mount
   useEffect(() => {
     const checkKeys = async () => {
-      const keyPair = retrieveKeyPair();
-      setHasKeys(!!keyPair);
-      
-      if (!keyPair) {
-        // Generate new keys if none exist
-        try {
+      try {
+        const keyPair = await retrieveKeyPair();
+        setHasKeys(!!keyPair);
+        
+        if (!keyPair) {
+          // Generate new keys if none exist
           await generateKeyPair();
           setHasKeys(true);
           toast({
             title: "Security Keys Generated",
-            description: "Your post-quantum encryption keys have been created.",
-          });
-        } catch (error) {
-          console.error("Error generating keys:", error);
-          toast({
-            title: "Error",
-            description: "Failed to generate security keys",
-            variant: "destructive",
+            description: "Your encryption keys have been created.",
           });
         }
+      } catch (error) {
+        console.error("Error checking/generating keys:", error);
+        toast({
+          title: "Error",
+          description: "Failed to set up encryption",
+          variant: "destructive",
+        });
       }
     };
     
@@ -215,7 +214,7 @@ const UserInfoForm = () => {
     setEncryptionLoading(true);
 
     try {
-      // Encrypt sensitive data using post-quantum cryptography
+      // Encrypt sensitive data
       const sensitiveData = {
         full_name: data.full_name,
         vehicle_number: data.vehicle_number,
@@ -224,6 +223,7 @@ const UserInfoForm = () => {
       };
       
       const encryptedData = await encryptData(sensitiveData);
+      setEncryptionLoading(false);
       
       // Save user data to Supabase
       const { error } = await supabase
@@ -244,7 +244,7 @@ const UserInfoForm = () => {
 
       toast({
         title: "Success",
-        description: "Your information has been securely updated with post-quantum encryption",
+        description: "Your information has been securely updated with encryption",
       });
     } catch (error: any) {
       toast({
@@ -265,7 +265,7 @@ const UserInfoForm = () => {
           <CardTitle className={cn("text-lg", isMobile && "text-base")}>Update Your Information</CardTitle>
           <div className="flex items-center gap-1 text-green-700">
             <Shield size={16} />
-            <span className="text-xs font-medium">Post-Quantum Secured</span>
+            <span className="text-xs font-medium">Secure Encryption</span>
           </div>
         </div>
       </CardHeader>
