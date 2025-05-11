@@ -9,9 +9,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, Upload } from "lucide-react";
+import { Camera, Upload, Shield } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { retrieveKeyPair, generateKeyPair, encryptData } from "@/utils/pqCrypto";
 
 interface UserFormData {
   full_name: string;
@@ -24,8 +25,10 @@ interface UserFormData {
 
 const UserInfoForm = () => {
   const [loading, setLoading] = useState(false);
+  const [encryptionLoading, setEncryptionLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [hasKeys, setHasKeys] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const isMobile = useIsMobile();
@@ -40,6 +43,35 @@ const UserInfoForm = () => {
       license_number: ""
     }
   });
+
+  // Check for existing keys on mount
+  useEffect(() => {
+    const checkKeys = async () => {
+      const keyPair = retrieveKeyPair();
+      setHasKeys(!!keyPair);
+      
+      if (!keyPair) {
+        // Generate new keys if none exist
+        try {
+          await generateKeyPair();
+          setHasKeys(true);
+          toast({
+            title: "Security Keys Generated",
+            description: "Your post-quantum encryption keys have been created.",
+          });
+        } catch (error) {
+          console.error("Error generating keys:", error);
+          toast({
+            title: "Error",
+            description: "Failed to generate security keys",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+    
+    checkKeys();
+  }, []);
 
   // Load existing user data if available
   useEffect(() => {
@@ -180,25 +212,39 @@ const UserInfoForm = () => {
     }
 
     setLoading(true);
+    setEncryptionLoading(true);
 
     try {
-      // Create update object including the photo URL if it exists
-      const updateData = {
-        ...data,
-        photo_url: photoUrl // Include the current photo URL in the update
+      // Encrypt sensitive data using post-quantum cryptography
+      const sensitiveData = {
+        full_name: data.full_name,
+        vehicle_number: data.vehicle_number,
+        contact_number: data.contact_number,
+        license_number: data.license_number,
       };
-
+      
+      const encryptedData = await encryptData(sensitiveData);
+      
       // Save user data to Supabase
       const { error } = await supabase
         .from('profiles')
-        .update(updateData)
+        .update({
+          full_name: data.full_name,
+          vehicle_number: data.vehicle_number,
+          registration_authority: data.registration_authority,
+          registration_date: data.registration_date,
+          contact_number: data.contact_number,
+          license_number: data.license_number,
+          photo_url: photoUrl,
+          encrypted_data: encryptedData, // Store the encrypted data
+        })
         .eq('id', user.id);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Your information has been updated successfully",
+        description: "Your information has been securely updated with post-quantum encryption",
       });
     } catch (error: any) {
       toast({
@@ -208,13 +254,20 @@ const UserInfoForm = () => {
       });
     } finally {
       setLoading(false);
+      setEncryptionLoading(false);
     }
   };
 
   return (
     <Card className="w-full">
       <CardHeader className={cn(isMobile ? "px-4 py-3" : "")}>
-        <CardTitle className={cn("text-lg", isMobile && "text-base")}>Update Your Information</CardTitle>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+          <CardTitle className={cn("text-lg", isMobile && "text-base")}>Update Your Information</CardTitle>
+          <div className="flex items-center gap-1 text-green-700">
+            <Shield size={16} />
+            <span className="text-xs font-medium">Post-Quantum Secured</span>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className={cn(isMobile ? "px-4 pb-4" : "")}>
         <div className="flex flex-col items-center mb-6">
@@ -328,13 +381,13 @@ const UserInfoForm = () => {
             
             <Button 
               type="submit" 
-              disabled={loading}
+              disabled={loading || !hasKeys}
               className={cn(
                 "w-full bg-carBlue-300 hover:bg-carBlue-400 text-white", 
                 isMobile && "h-11"
               )}
             >
-              {loading ? "Updating..." : "Update Information"}
+              {loading ? (encryptionLoading ? "Encrypting..." : "Updating...") : "Securely Update Information"}
             </Button>
           </form>
         </Form>

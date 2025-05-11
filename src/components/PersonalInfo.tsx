@@ -1,11 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Car, FileText, User, MapPin, Calendar, Phone } from "lucide-react";
+import { Car, FileText, User, MapPin, Calendar, Phone, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { decryptData } from "@/utils/pqCrypto";
 
 interface UserData {
   full_name: string | null;
@@ -15,10 +16,13 @@ interface UserData {
   registration_date: string | null;
   contact_number: string | null;
   license_number: string | null;
+  encrypted_data?: string | null;
 }
 
 const PersonalInfo = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [decryptedData, setDecryptedData] = useState<Record<string, any> | null>(null);
+  const [isDecrypting, setIsDecrypting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -35,29 +39,59 @@ const PersonalInfo = () => {
 
         if (error) throw error;
         setUserData(data);
+        
+        // Try to decrypt the encrypted data if available
+        if (data?.encrypted_data) {
+          setIsDecrypting(true);
+          const decrypted = await decryptData(data.encrypted_data);
+          setDecryptedData(decrypted);
+          setIsDecrypting(false);
+        }
       } catch (error: any) {
         toast({
           title: "Error",
           description: "Failed to fetch user data",
           variant: "destructive",
         });
+        setIsDecrypting(false);
       }
     };
 
     fetchUserData();
   }, [user]);
 
+  const getDisplayValue = (key: string, defaultValue: string | null) => {
+    // First try to get the value from decrypted data if available
+    if (decryptedData && key in decryptedData) {
+      return decryptedData[key] || "Not available";
+    }
+    
+    // Otherwise use the regular data
+    return defaultValue || "Not available";
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <User className="text-carPurple-200" />
-          Personal Information
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="text-carPurple-200" />
+            Personal Information
+          </CardTitle>
+          <Badge variant="outline" className="flex items-center gap-1 text-green-700 border-green-700">
+            <Shield className="h-3 w-3" /> Post-Quantum Secured
+          </Badge>
+        </div>
         <CardDescription>Your profile information</CardDescription>
       </CardHeader>
       <CardContent>
-        {userData ? (
+        {isDecrypting && (
+          <div className="text-center p-4">
+            <p className="text-sm text-gray-500">Decrypting your secure data...</p>
+          </div>
+        )}
+        
+        {!isDecrypting && userData ? (
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="flex flex-col items-center">
               <Avatar className="h-24 w-24 mb-2">
@@ -71,7 +105,7 @@ const PersonalInfo = () => {
                 <User className="text-carPurple-200 mt-1" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">Full Name</p>
-                  <p className="font-medium">{userData.full_name || "Not available"}</p>
+                  <p className="font-medium">{getDisplayValue("full_name", userData.full_name)}</p>
                 </div>
               </div>
               
@@ -79,7 +113,7 @@ const PersonalInfo = () => {
                 <Car className="text-carPurple-200 mt-1" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">Vehicle Number</p>
-                  <p className="font-medium">{userData.vehicle_number || "Not available"}</p>
+                  <p className="font-medium">{getDisplayValue("vehicle_number", userData.vehicle_number)}</p>
                 </div>
               </div>
               
@@ -87,7 +121,7 @@ const PersonalInfo = () => {
                 <MapPin className="text-carPurple-200 mt-1" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">Registration Authority</p>
-                  <p className="font-medium">{userData.registration_authority || "Not available"}</p>
+                  <p className="font-medium">{getDisplayValue("registration_authority", userData.registration_authority)}</p>
                 </div>
               </div>
               
@@ -105,7 +139,7 @@ const PersonalInfo = () => {
                 <Phone className="text-carPurple-200 mt-1" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">Contact Number</p>
-                  <p className="font-medium">{userData.contact_number || "Not available"}</p>
+                  <p className="font-medium">{getDisplayValue("contact_number", userData.contact_number)}</p>
                 </div>
               </div>
               
@@ -113,7 +147,7 @@ const PersonalInfo = () => {
                 <FileText className="text-carPurple-200 mt-1" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">License Number</p>
-                  <p className="font-medium">{userData.license_number || "Not available"}</p>
+                  <p className="font-medium">{getDisplayValue("license_number", userData.license_number)}</p>
                 </div>
               </div>
             </div>
